@@ -1,5 +1,13 @@
 # minimalist_webserver by Mario Chavez
 
+
+## Install packages
+
+```
+$ pip install -r requirements/base
+```
+## Rules
+```
 # Method not allowed 
 http GET 'http://127.0.0.1:9292' 
 
@@ -16,3 +24,6 @@ http POST 'http://127.0.0.1:9292' Accept:"application/json" Content-Type:"applic
 # Successful 
 http POST 'http://127.0.0.1:9292' Accept:"application/json" Content-Type:"application/json" name="michelada" email="hello@michelada.io" 
 http POST 'http://127.0.0.1:9292' Content-Type:"application/json" name="michelada" email="hello@michelada.io"
+
+```
+
