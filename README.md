@@ -1,5 +1,18 @@
 # minimalist_webserver by Mario Chavez
+Pongo este code challange para quien decida participar. El reto es escribir un servidor Web que responda a un solo endpoint que recibe mediante un POST un documento json.
+```
+{
+  name: "michelada",
+  email: "hello@michelada.io"
+}
 
+```
+El endpoint no debe de hacer nada con los datos, simplemente responder de forma correcta que los recibió.
+
+## Used libs 
+```
+uvicorn==0.12.1
+```
 
 ## Install packages
 
