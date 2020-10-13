@@ -33,7 +33,6 @@ def test_bad_request():
     assert response.status_code == 400
 
 
-
 def test_payload_incorrect():
     headers = {'accept': 'application/json', 'content-type': 'application/json'}
     response = requests.post("http://127.0.0.1:9292", headers=headers, json=dict(name="michelada",
