@@ -2,13 +2,17 @@ import json
 import uvicorn
 
 
-def is_ok_accept_header(headers):
-    if 'accept' in headers and headers.get('accept', '').lower() != 'application/json':
+def is_valid_accept_header(headers=None):
+    if headers.get('accept', '').lower() == 'application/json':
         return True
+
+    if is_valid_content_type(headers) and headers.get('accept', '').lower() == '*/*':
+        return True
+
     return False
 
 
-def is_ok_content_type(headers):
+def is_valid_content_type(headers=None):
     if headers.get('content-type', '').lower() == 'application/json':
         return True
     return False
@@ -20,19 +24,6 @@ def is_ok_http_method(http_method):
     return False
 
 
-def is_ok_request(request_data):
-    if not request_data:
-        return False
-
-    if 'name' not in request_data:
-        return False
-
-    if 'email' not in request_data:
-        return False
-
-    return True
-
-
 def get_payload(message):
     payload_body = message.get('body', b'{}')
     try:
@@ -40,6 +31,23 @@ def get_payload(message):
     except Exception:
         request = None
     return request
+
+
+def is_payload_empty(request):
+    if request is None or request == {}:
+        return True
+    return False
+
+
+def is_payload_valid(request_data):
+    _request_data = request_data if request_data else {}
+    if 'name' not in _request_data:
+        return False
+
+    if 'email' not in _request_data:
+        return False
+
+    return True
 
 
 async def process(scope, receive):
@@ -57,16 +65,22 @@ async def process(scope, receive):
     if not is_ok_http_method(http_method):
         return 405, b'Method not allowed'
 
-    elif not is_ok_accept_header(headers):
+    if not is_valid_accept_header(headers=headers):
         return 406, b'Not acceptable request'
 
-    elif not is_ok_content_type(headers):
+    if not is_valid_content_type(headers=headers):
         return 400, b'Bad request'
 
-    elif not is_ok_request(request_data):
-        return 422, b'Missing or empty name or email '
+    if is_valid_accept_header(headers=headers) and is_valid_content_type(headers=headers) and is_payload_valid(request_data):
+        return 200, b'Successful'
 
-    return 200,  b'Successful'
+    if is_payload_empty(request_data):
+        return 400, b'Bad request'
+    
+    if not is_payload_valid(request_data):
+        return 422, b'Missing or empty name or email'
+
+    return 500, b'Error'
 
 
 async def app(scope, receive, send):
