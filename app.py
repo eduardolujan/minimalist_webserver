@@ -2,39 +2,69 @@ import json
 import uvicorn
 
 
+def is_ok_accept_header(headers):
+    if 'accept' in headers and headers.get('accept', '').lower() != 'application/json':
+        return True
+    return False
+
+
+def is_ok_content_type(headers):
+    if headers.get('content-type', '').lower() == 'application/json':
+        return True
+    return False
+
+
+def is_ok_http_method(http_method):
+    if http_method in ['post']:
+        return True
+    return False
+
+
+def is_ok_request(request_data):
+    if not request_data:
+        return False
+
+    if 'name' not in request_data:
+        return False
+
+    if 'email' not in request_data:
+        return False
+
+    return True
+
+
+def get_payload(message):
+    payload_body = message.get('body', b'{}')
+    try:
+        request = json.loads(payload_body.decode('utf-8'))
+    except Exception:
+        request = None
+    return request
+
+
 async def process(scope, receive):
     """
     Read and return the entire body from an incoming ASGI message.
     """
-
-    if scope.get('method', '').lower() not in ['post']:
-        return 405, b'Method not allowed'
-
+    http_method = scope.get('method', '').lower()
     headers = {
         key.decode('utf-8'): value.decode('utf-8')
-            for key, value in scope.get('headers', tuple())
+        for key, value in scope.get('headers', tuple())
     }
-
     message = await receive()
-    body = message.get('body', b'{}')
-    try:
-        request = json.loads(body.decode('utf-8'))
-    except Exception:
-        request = {}
+    request_data = get_payload(message)
 
-    if 'accept' in headers and headers.get('accept', '').lower() != 'application/json' and \
-            ('name' not in request or 'email' not in request):
+    if not is_ok_http_method(http_method):
+        return 405, b'Method not allowed'
+
+    elif not is_ok_accept_header(headers):
         return 406, b'Not acceptable request'
 
-    if ('accept' in headers and headers.get('accept', '').lower() == 'application/json') and \
-            (headers.get('content-type', '').lower() == 'application/xml' or
-             ('name' not in request and 'email' not in request)):
+    elif not is_ok_content_type(headers):
         return 400, b'Bad request'
 
-    if ('accept' in headers and headers.get('accept', '').lower() == 'application/json') and \
-            headers.get('content-type', '').lower() == 'application/json' and \
-            ('name' not in request or 'email' not in request):
-        return 500, b'Missing or empty name or email '
+    elif not is_ok_request(request_data):
+        return 422, b'Missing or empty name or email '
 
     return 200,  b'Successful'
 
