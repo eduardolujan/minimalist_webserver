@@ -15,13 +15,7 @@ def test_not_acceptable_request():
 
 
 def test_bad_request():
-    """
-    http POST 'http://127.0.0.1:9292' Accept:"application/json" Content-Type:"application/xml"
-        name="michelada" email="hello@michelada.io"
 
-    http POST 'http://127.0.0.1:9292' Accept:"application/json" Content-Type:"application/json"
-
-    """
     headers = {'accept': 'application/json', 'content-type': 'application/xml'}
     response = requests.post("http://127.0.0.1:9292", headers=headers, json=dict(name="michelada",
                                                                                  email="hello@michelada.io"))
@@ -30,6 +24,10 @@ def test_bad_request():
 
     headers = {'accept': 'application/json', 'content-type': 'application/json'}
     response = requests.post("http://127.0.0.1:9292", headers=headers, json=dict())
+    assert response.status_code == 400
+
+    headers = {'accept': 'application/json', 'content-type': 'application/json'}
+    response = requests.post("http://127.0.0.1:9292", headers=headers)
     assert response.status_code == 400
 
 
