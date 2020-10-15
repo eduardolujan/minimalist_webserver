@@ -49,6 +49,3 @@ def test_success():
                                                                                  email="hello@michelada.io"))
     assert response.status_code == 200
 
-
-if __name__ == '__main__':
-    test_success()
